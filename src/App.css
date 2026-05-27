@@ -517,3 +517,89 @@
 .node-dropdown-menu button {
   white-space: nowrap;
 }
+
+/* --- AKCENTY KOLORYSTYCZNE REGUŁ --- */
+.rule-select .node-header { background-color: #6366f1; color: white; }
+.rule-range .node-header { background-color: #06b6d4; color: white; }
+.rule-boolean .node-header { background-color: #10b981; color: white; }
+.rule-any .node-header { background-color: #f59e0b; color: white; }
+
+/* --- WSPÓLNY SZKIELET WĘZŁA (RULE) --- */
+.custom-flow-node {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  min-width: 240px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+.node-header {
+  padding: 8px 14px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.input-group {
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.node-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.node-input {
+  width: 100%;
+  padding: 8px 10px;
+  font-size: 13px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  outline: none;
+  box-sizing: border-box;
+}
+.node-input:focus {
+  border-color: #6366f1;
+}
+
+/* --- MINI PRZYCISK I TAGI ENUMA --- */
+.node-mini-btn {
+  background-color: #1e293b;
+  color: white;
+  border: none;
+  padding: 0 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.enum-tags-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 4px;
+}
+.enum-tag {
+  background-color: #f1f5f9;
+  color: #334155;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid #cbd5e1;
+}
+
+/* --- HANDLES --- */
+.custom-handle {
+  background: #64748b !important;
+  width: 8px !important;
+  height: 8px !important;
+  border: 2px solid #ffffff !important;
+}

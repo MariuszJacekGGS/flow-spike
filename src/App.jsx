@@ -6,18 +6,63 @@ import { SelectListUpdate } from './components/SelectListNode';
 import './App.css' 
 import { RangeNode } from './components/RangeNode';
 
+
 const initialNodes = [
-  { id: 'n0', type: 'textUpdater',position: { x: 0, y: 100 }, data: { label: 'Node 0', text: '', category: 'Polygon', rangeValue: 0 } },
-  { id: 'n1', type: 'textUpdater', position: { x: 30, y: 0 }, data: { label: 'Node 1', text: '', category: 'Polygon', rangeValue: 0 } },
-  { id: 'n2', type: 'selectList', position: { x: 0, y: 200 }, data: { label: 'Node 2', text: '', category: 'Polygon', rangeValue: 0 } },
-  { id: 'n3', type: 'selectList', position: { x: 60, y: 205 }, data: { label: 'Node 3', text: '', category: 'Polygon', rangeValue: 0 } },
-  { id: 'n4', type: 'range', position: { x: 130, y: 250 }, data: { label: 'Node 4', text: '', category: 'Polygon', rangeValue: 30} },
+  { 
+    id: 'n0', 
+    type: 'selectList', 
+    position: { x: 200, y: 0 }, 
+    data: { label: 'Krok 1: Typ Produktu', category: 'Polygon' } 
+  },
+  { 
+    id: 'n1', 
+    type: 'range', 
+    position: { x: 200, y: 180 }, 
+    data: { label: 'Krok 2: Wolumen Zamówienia', rangeValue: 30 } 
+  },
+  { 
+    id: 'n2', 
+    type: 'textUpdater', 
+    position: { x: 0, y: 380 }, 
+    data: { label: 'Ścieżka A: Modyfikator Ceny', text: 'CenaBazowa * 1.0' } 
+  },
+  { 
+    id: 'n3', 
+    type: 'textUpdater', 
+    position: { x: 400, y: 380 }, 
+    data: { label: 'Ścieżka B: Modyfikator Ceny', text: 'CenaBazowa * 0.85 + 0' }
+  },
 ];
 
-const initialEdges = [{ id: 'n0-n1', source: 'n0', sourceHanle: 'a', target: 'n1', type: 'step', label: 'xD costam xD' },
-  { id: 'n1-n2', source: 'n1', sourceHanle: 'a', target: 'n2', type: 'step', label: 'xD costam xD' },
-  { id: 'n2-n3', source: 'n2', sourceHanle: 'b', target: 'n3', type: 'step', label: 'xD costam xD' },
-  { id: 'n3-n4', source: 'n2', sourceHanle: 'b', target: 'n4', type: 'step', label: 'xD costam xD' }
+const initialEdges = [
+  { 
+    id: 'e_n0-n1', 
+    source: 'n0', 
+    sourceHandle: 'source-handle', 
+    target: 'n1', 
+    type: 'step', 
+    animated: true,
+    label: 'Jeśli Polygon',
+    data: { conditionType: 'equals', value: 'Polygon' } 
+  },//jeżeli condition type to range split lub range max
+  { 
+    id: 'e_n1-n2', 
+    source: 'n1', 
+    sourceHandle: 'source-handle', 
+    target: 'n2', 
+    type: 'step', 
+    label: 'Ilość <= 50 szt.',
+    data: { conditionType: 'lessThanOrEqual', value: 50 } 
+  },
+  { 
+    id: 'e_n1-n3', 
+    source: 'n1', 
+    sourceHandle: 'source-handle', 
+    target: 'n3', 
+    type: 'step', 
+    label: 'Ilość > 50 szt.',
+    data: { conditionType: 'greaterThan', value: 50 } 
+  }
 ];
 
  
@@ -73,27 +118,34 @@ export default function App() {
 
   };
 
-  const logFullConfiguration = () => {
+const logFullConfiguration = () => {
+  const jsonOutput = {
+    updatedAt: new Date().toISOString(),
 
-    const jsonOutput = {
-      updatedAt: new Date().toISOString(),
-      totalNodes: nodes.length,
+    nodes: nodes.map(node => ({
+      id: node.id,
+      type: node.type,
+      properties: {
+        text: node.data.text || null,
+        category: node.data.category || null,
+        rangeValue: node.data.rangeValue ?? null
+      }
+    })),
 
-      config: nodes.reduce((acc, node) => {
-        acc[node.id] = {
-          type: node.type,
-          text: node.data.text || '',
-          category: node.data.category || 'Polygon',
-          rangeValue: node.data.rangeValue ?? 50,
-          position: node.position
-        };
-        return acc;
-      }, {})
-    };
-
-    console.log("=== PEŁNY OBIEKT KONFIGURACYJNY DLA BACKENDU ===");
-    console.log(JSON.stringify(jsonOutput, null, 2));
+    rules: edges.map(edge => ({
+      id: edge.id,
+      fromNode: edge.source,
+      toNode: edge.target,
+      condition: edge.data?.conditionType ? {
+        type: edge.data.conditionType,
+        value: edge.data.value
+      } : null
+    }))
   };
+
+  console.log("=== STRUKTURA SILNIKA REGUŁ BIZNESOWYCH ===");
+  console.log(JSON.stringify(jsonOutput, null, 2));
+};
  
   return (
     <div style={{ width: '100vw', height: '100vh' }}>
