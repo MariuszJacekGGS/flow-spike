@@ -6,9 +6,14 @@ export function NodeAdder({ parentNodeId}) {
     const [isOpen, setIsOpen] = useState(false);
     const { setNodes, getNode, setEdges } = useReactFlow();
 
-    const handleAddChildNode = (type) => {
+    const parentNode = getNode(parentNodeId);
+    const outEdges = getEdges().filter(e => e.source === parentNodeId);
 
-        const parentNode = getNode(parentNodeId);
+    if (parentNode && ['BOOLEAN', 'ANY_VALUE'].includes(parentNode.type) && outEdges.length >= 2){
+        return null;
+    }
+
+    const handleAddChildNode = (type) => {
 
         const parentPos = parentNode ? parentNode.position : { x: 0, y: 0};
 

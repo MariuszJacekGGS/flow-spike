@@ -80,6 +80,48 @@ export default function App() {
     const allRules = nodes.filter(n => n.type !== 'CALCULATION');
     const allCalculations = nodes.filter(n => n.type === 'CALCULATION');
 
+    const buildPathForCalculation = (calcNodeId) => {
+      let currentTargetId = calcNodeId;
+      let pathSteps = [];
+      let safetyCounter = 0;
+
+      while (currentTargetId && safetyCounter < 100){
+        
+        safetyCounter++;
+
+        const incomingEdge = edges.find(edge => edge.target === currentTargetId);
+
+        if (!incomingEdge){
+            break;
+        }
+
+        const parentNode = nodes.find(node => node.id === incomingEdge.source);
+
+  if (parentNode) {
+          const varName = parentNode.data.variableName || 'NIEZNANA_ZMIENNA';
+          const condType = incomingEdge.data?.conditionValueTypeCode || 'NOT_SET';
+          const condVal = incomingEdge.data?.value || '';
+
+          let stepDescription = '';
+          if (condType === 'BOOL_TRUE') stepDescription = `${varName} == TRUE`;
+          else if (condType === 'BOOL_FALSE') stepDescription = `${varName} == FALSW`;
+          else if (condType === 'LIST_OPTION') stepDescription = `${varName} == "${condVal}"`;
+          else if (condType === 'LIST_OTHER') stepDescription = `${varName} == OTHER_VALUE`;
+          else if (condType === 'RANGE_SPLIT') stepDescription = `${varName} < ${condVal}`;
+          else if (condType === 'RANGE_MAX') stepDescription = `${varName} <= ${condVal} (MAX)`;
+          else if (condType === 'ANY_VALUE') stepDescription = `${varName} HAS_ANY_VALUE`;
+          else if (condType === 'NO_VALUE') stepDescription = `${varName} IS_NULL`;
+          else stepDescription = `${varName} [${condType}] ${condVal}`;
+
+          pathSteps.unshift(stepDescription);
+        }
+
+        currentTargetId = incomingEdge.source;
+      }
+
+      return pathSteps.length > 0 ? pathSteps.join(' -> ') : 'Node zombie';
+    };
+
     const treePayload = {
       updatedAt: new Date().toISOString(),
       // rules: nodes.map(node => ({
@@ -119,12 +161,20 @@ export default function App() {
         value: edge.data?.value || null
       })),
 
-      calculations: allCalculations.map(node => ({
-        id: node.id,
-        calculationTypeCode: node.data.calculationTypeCode || 'MATH_FORMULA',
-        returnMetricType: node.data.returnMetricType || 'NUMBER',
-        expression: node.data.expression || ''
-      }))
+      calculations: allCalculations.map(node => {
+        const generatedPath = buildPathForCalculation(node.id);
+        const expression = node.data.expression || '0';
+
+        return {
+          id: node.id,
+          calculationTypeCode: node.data.calculationTypeCode || 'MATH_FORMULA',
+          returnMetricType: node.data.returnMetricType || 'NUMBER',
+          expression: expression,
+
+          humanRedablePath: generatedPath,
+          finalFormulaSummary: `IF (${generatedPath}) THEN USE: [${expression}]`
+        };
+      })
 
     };
 

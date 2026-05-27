@@ -15,7 +15,7 @@ export function ConditionEdge({
   style,
   data
 }) {
-  const { getEngine, setEdges, getNode } = useReactFlow();
+  const { getEngine, setEdges, getNode, getEdges } = useReactFlow();
 
 
   const [edgeX, edgeY] = getEdgeCenter({
@@ -27,7 +27,19 @@ export function ConditionEdge({
 
   const sourceNode = getNode(source);
   const sourceType = sourceNode ? sourceNode.type : null; 
-  const availableConditions = CONDITION_TYPES_MAP[sourceType] || [];
+  const allConditions = CONDITION_TYPES_MAP[sourceType] || [];
+
+  const siblingsEdges = getEdges().filter(edge => edge.source === source && edge.id !== id);
+
+  const usedConditionCodes = siblingsEdges.map(edge => edge.data?.conditionValueTypeCode);
+
+  const availableConditions = allConditions.filter(cond => {
+    if(['BOOLEAN', 'ANY_VALUE'].includes(sourceType)) {
+        return !usedConditionCodes.includes(cond.code) || data?.conditionValueTypeCode === cond.code;
+    }
+
+    return true;
+  })
 
   const updateEdgeData = (field, value) => {
     setEdges((eds) =>
@@ -37,7 +49,7 @@ export function ConditionEdge({
           
           let newLabel = value;
           if (field === 'conditionValueTypeCode') {
-            const found = availableConditions.find(c => c.code === value);
+            const found = allConditions.find(c => c.code === value);
             newLabel = found ? found.name : value;
           }
 
