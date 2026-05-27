@@ -5,9 +5,9 @@ export function BooleanRuleNode({ id, data }) {
 
   return (
     <div className="custom-flow-node rule-boolean">
-      <div className="node-header">Rule: BOOLEAN (Tak/Nie)</div>
+      <div className="node-header">Rule: BOOLEAN (Yes/No)</div>
       <div className="input-group">
-        <label className="node-label">Floka logiczna</label>
+        <label className="node-label">Logic Variable</label>
         <input 
           type="text" 
           className="node-input nodrag" 

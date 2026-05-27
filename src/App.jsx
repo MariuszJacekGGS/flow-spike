@@ -1,181 +1,143 @@
 import { useState, useCallback } from 'react';
 import { ReactFlow, applyNodeChanges, applyEdgeChanges, addEdge, Background, Controls } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-import { TextUpdaterNode } from './components/TextUpdaterNode';
-import { SelectListUpdate } from './components/SelectListNode';
-import './App.css' 
-import { RangeNode } from './components/RangeNode';
 
+
+import { RangeRuleNode } from './components/RangeRuleNode';
+import { SelectRuleNode } from './components/SelectRuleNode';
+import { BooleanRuleNode } from './components/BooleanRuleNode';
+import { AnyValueRuleNode } from './components/AnyValueRuleNode';
+
+import { ConditionEdge } from './components/ConditionEdge';
+import { RULE_METRIC_MAP } from './constants/calculations';
+
+import './App.css';
 
 const initialNodes = [
   { 
-    id: 'n0', 
-    type: 'selectList', 
-    position: { x: 200, y: 0 }, 
-    data: { label: 'Krok 1: Typ Produktu', category: 'Polygon' } 
-  },
-  { 
-    id: 'n1', 
-    type: 'range', 
-    position: { x: 200, y: 180 }, 
-    data: { label: 'Krok 2: Wolumen Zamówienia', rangeValue: 30 } 
-  },
-  { 
-    id: 'n2', 
-    type: 'textUpdater', 
-    position: { x: 0, y: 380 }, 
-    data: { label: 'Ścieżka A: Modyfikator Ceny', text: 'CenaBazowa * 1.0' } 
-  },
-  { 
-    id: 'n3', 
-    type: 'textUpdater', 
-    position: { x: 400, y: 380 }, 
-    data: { label: 'Ścieżka B: Modyfikator Ceny', text: 'CenaBazowa * 0.85 + 0' }
-  },
-];
-
-const initialEdges = [
-  { 
-    id: 'e_n0-n1', 
-    source: 'n0', 
-    sourceHandle: 'source-handle', 
-    target: 'n1', 
-    type: 'step', 
-    animated: true,
-    label: 'Jeśli Polygon',
-    data: { conditionType: 'equals', value: 'Polygon' } 
-  },//jeżeli condition type to range split lub range max
-  { 
-    id: 'e_n1-n2', 
-    source: 'n1', 
-    sourceHandle: 'source-handle', 
-    target: 'n2', 
-    type: 'step', 
-    label: 'Ilość <= 50 szt.',
-    data: { conditionType: 'lessThanOrEqual', value: 50 } 
-  },
-  { 
-    id: 'e_n1-n3', 
-    source: 'n1', 
-    sourceHandle: 'source-handle', 
-    target: 'n3', 
-    type: 'step', 
-    label: 'Ilość > 50 szt.',
-    data: { conditionType: 'greaterThan', value: 50 } 
+    id: 'rule_start', 
+    type: 'SELECT',
+    position: { x: 250, y: 50 }, 
+    data: { 
+      variableName: 'PRODUCT_COLOR', 
+      options: ['WHITE', 'BLACK'] 
+    } 
   }
 ];
 
- 
+const initialEdges = [];
+
 export default function App() {
-  
   const [nodes, setNodes] = useState(initialNodes);
   const [edges, setEdges] = useState(initialEdges);
-
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const nodeTypes = {
-    textUpdater: TextUpdaterNode,
-    selectList: SelectListUpdate,
-    range: RangeNode,
+    RANGE: RangeRuleNode,
+    SELECT: SelectRuleNode,
+    BOOLEAN: BooleanRuleNode,
+    ANY_VALUE: AnyValueRuleNode,
+    CALCULATION: CalculationNode,
+  };
+
+  const edgeTypes = {
+    step: ConditionEdge,
   };
 
   const onNodesChange = useCallback(
-    (changes) => setNodes((nodesSnapshot) => applyNodeChanges(changes, nodesSnapshot)),
-    [],
+    (changes) => setNodes((nds) => applyNodeChanges(changes, nds)),
+    []
   );
   const onEdgesChange = useCallback(
-    (changes) => setEdges((edgesSnapshot) => applyEdgeChanges(changes, edgesSnapshot)),
-    [],
+    (changes) => setEdges((eds) => applyEdgeChanges(changes, eds)),
+    []
   );
+  
   const onConnect = useCallback(
-    (params) => setEdges((edgesSnapshot) => addEdge(params, edgesSnapshot)),
-    [],
+    (params) => setEdges((eds) => addEdge({ ...params, type: 'step', animated: true }, eds)),
+    []
   );
 
-  const addNewNode = (type) => {
-    
-    const uniqueId = `n_${Date.now()}`;
-
-    const position = {
-      x: Math.random() * 150,
-      y: Math.random() * 150 + 50,
-    };
-
+  const addNewRule = (ruleType) => {
+    const uniqueId = `rule_${Date.now()}`;
     const newNode = {
       id: uniqueId,
-      type: type,
-      position: position,
-      data: {
-        label: `Node ${nodes.length}`,
-        text: '',
-        category: 'Polygon',
-        rangeValue: type === 'range' ? 30 : 0
+      type: ruleType,
+      position: { x: Math.random() * 200 + 100, y: Math.random() * 200 + 100 },
+      data: { 
+        variableName: `NOWA_ZMIENNA_${nodes.length}`,
+        options: ruleType === 'SELECT' ? [] : null
       },
     };
 
-    setNodes((prevNodes) => [...prevNodes, newNode]);
+    setNodes((nds) => [...nds, newNode]);
     setIsDropdownOpen(false);
-
   };
 
-const logFullConfiguration = () => {
-  const jsonOutput = {
-    updatedAt: new Date().toISOString(),
+  const generateCalculationTree = () => {
+    const allRules = nodes.filter(n => n.type !== 'CALCULATION');
+    const allCalculations = nodes.filter(n => n.type === 'CALCULATION');
 
-    nodes: nodes.map(node => ({
-      id: node.id,
-      type: node.type,
-      properties: {
-        text: node.data.text || null,
-        category: node.data.category || null,
-        rangeValue: node.data.rangeValue ?? null
-      }
-    })),
+    const treePayload = {
+      updatedAt: new Date().toISOString(),
+      rules: nodes.map(node => ({
+        id: node.id,
+        conditionTypeCode: node.type,
+        metricTypeCode: RULE_METRIC_MAP[node.type] || 'TEXT',
+        variableName: node.data.variableName || 'UNNAMED',
+        meta: {
+          options: node.data.options || null,
+          rangeMax: node.data.rangeMax || null,
+        }
+      })),
+      conditions: edges.map(edge => ({
+        id: edge.id,
+        fromRuleId: edge.source,
+        toRuleId: edge.target,
+        conditionValueTypeCode: edge.data?.conditionValueTypeCode || 'NOT_SET',
+        value: edge.data?.value || (edge.data?.conditionValueTypeCode === 'BOOL_TRUE' ? 'true' : edge.data?.conditionValueTypeCode === 'BOOL_FALSE' ? 'false' : null) || null
+      }))
+    };
 
-    rules: edges.map(edge => ({
-      id: edge.id,
-      fromNode: edge.source,
-      toNode: edge.target,
-      condition: edge.data?.conditionType ? {
-        type: edge.data.conditionType,
-        value: edge.data.value
-      } : null
-    }))
+    console.log("=== GENERATOED STRUCTURE OF CALCULATIONS TREE ===");
+    console.log(JSON.stringify(treePayload, null, 2));
   };
 
-  console.log("=== STRUKTURA SILNIKA REGUŁ BIZNESOWYCH ===");
-  console.log(JSON.stringify(jsonOutput, null, 2));
-};
- 
   return (
-    <div style={{ width: '100vw', height: '100vh' }}>
-
-    <div className="action-bar">
+    <div style={{ width: '100vw', height: '100vh', position: 'relative' }}>
       
-      <button onClick={logFullConfiguration} className="action-btn primary-btn">
-        Pokaż konfigurację w konsoli
-      </button>
+      {/* Pasek narzędziowy */}
+      <div className="action-bar">
+        <button onClick={generateCalculationTree} className="action-btn primary-btn">
+          Generuj strukturę obliczeń 🚀
+        </button>
 
-      <div className="dropdown-container">
-         <button 
-           onClick={() => setIsDropdownOpen(!isDropdownOpen)} 
-           className={`action-btn secondary-btn ${isDropdownOpen ? 'active' : ''}`}
-         >
-           Dodaj nowe node <span className="arrow">▼</span>
-         </button>
+        <div className="dropdown-container">
+          <button 
+            onClick={() => setIsDropdownOpen(!isDropdownOpen)} 
+            className={`action-btn secondary-btn ${isDropdownOpen ? 'active' : ''}`}
+          >
+            + Dodaj regułę (Rule) <span className="arrow">▼</span>
+          </button>
 
-         {isDropdownOpen && (
-           <div className="dropdown-menu">
-             <button onClick={() => addNewNode('textUpdater')} className="dropdown-item">
-               <span className="icon">📝</span> Text Updater Node
-             </button>
-             <button onClick={() => addNewNode('selectList')} className="dropdown-item">
-               <span className="icon">▼</span> Select List Node
-             </button>
-             <button onClick={() => addNewNode('range')} className="dropdown-item">
-               <span className="icon">🎚️</span> Range Node
-             </button>
-           </div>
+          {isDropdownOpen && (
+            <div className="dropdown-menu">
+              <button onClick={() => addNewRule('SELECT')} className="dropdown-item">
+                <span className="icon">▼</span> Select List (Enum)
+              </button>
+              <button onClick={() => addNewRule('RANGE')} className="dropdown-item">
+                <span className="icon">🎚️</span> Range
+              </button>
+              <button onClick={() => addNewRule('BOOLEAN')} className="dropdown-item">
+                <span className="icon">⚖️</span> True / False (Boolean)
+              </button>
+              <button onClick={() => addNewRule('ANY_VALUE')} className="dropdown-item">
+                <span className="icon">🔍</span> Has Any Value
+              </button>
+              <button onClick={() => addNewRule('CALCULATION')} className="dropdown-item">
+                <span className="icon">🧮</span> Calculation (Equations / Value)
+              </button>
+            </div>
           )}
         </div>
       </div>
@@ -184,6 +146,7 @@ const logFullConfiguration = () => {
         nodes={nodes}
         edges={edges}
         nodeTypes={nodeTypes}
+        edgeTypes={edgeTypes}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}

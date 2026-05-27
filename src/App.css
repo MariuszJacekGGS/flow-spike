@@ -603,3 +603,38 @@
   height: 8px !important;
   border: 2px solid #ffffff !important;
 }
+
+.edge-condition-container {
+  background-color: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 5px;
+  display: flex;
+  gap: 4px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+  z-index: 10;
+}
+
+.edge-select {
+  padding: 4px 6px;
+  font-size: 11px;
+  font-weight: 600;
+  border: 1px solid #e2e8f0;
+  background-color: #f8fafc;
+  border-radius: 4px;
+  color: #334155;
+  outline: none;
+  cursor: pointer;
+}
+
+.edge-input {
+  width: 70px;
+  padding: 4px 6px;
+  font-size: 11px;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  outline: none;
+}
+.edge-input:focus {
+  border-color: #6366f1;
+}

@@ -11,7 +11,7 @@ export function RangeRuleNode({ id, data }) {
     <div className="custom-flow-node rule-range">
       <div className="node-header">Rule: RANGE (Liczba)</div>
       <div className="input-group">
-        <label className="node-label">Zmienna liczbowa</label>
+        <label className="node-label">Numeric vvariable</label>
         <input 
           type="text" 
           className="node-input nodrag" 
@@ -19,7 +19,7 @@ export function RangeRuleNode({ id, data }) {
           onChange={(e) => setNodes((nds) => nds.map(n => n.id === id ? { ...n, data: { ...n.data, variableName: e.target.value } } : n))}
           placeholder="np. ILOSC_SZTUK"
         />
-        <label className="node-label" style={{marginTop: '8px'}}>Granica maksymalna</label>
+        <label className="node-label" style={{marginTop: '8px'}}>Max Range</label>
         <input 
           type="number" 
           className="node-input nodrag" 

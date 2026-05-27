@@ -22,16 +22,16 @@ export function SelectRuleNode({ id, data }) {
     <div className="custom-flow-node rule-select">
       <div className="node-header">Rule: SELECT (Enum)</div>
       <div className="input-group">
-        <label className="node-label">Nazwa cechy</label>
+        <label className="node-label">Feature name</label>
         <input 
           type="text" 
           className="node-input nodrag" 
           value={data.variableName || ""} 
           onChange={(e) => updateName(e.target.value)}
-          placeholder="np. KOLOR_PRODUKTU"
+          placeholder="ex. PRODUCT_COLOR"
         />
         
-        <label className="node-label" style={{marginTop: '8px'}}>Opcje wyboru</label>
+        <label className="node-label" style={{marginTop: '8px'}}>Options to choose</label>
         <div className="enum-tags-container">
           {options.map((opt, i) => <span key={i} className="enum-tag">{opt}</span>)}
         </div>
@@ -42,7 +42,7 @@ export function SelectRuleNode({ id, data }) {
             className="node-input" 
             value={inputVal} 
             onChange={(e) => setInputVal(e.target.value)}
-            placeholder="Dodaj opcję..."
+            placeholder="Add options..."
           />
           <button onClick={addOption} className="node-mini-btn">+</button>
         </div>
