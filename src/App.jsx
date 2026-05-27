@@ -11,6 +11,8 @@ import { AnyValueRuleNode } from './components/AnyValueRuleNode';
 import { ConditionEdge } from './components/ConditionEdge';
 import { RULE_METRIC_MAP } from './constants/calculations';
 
+import { CalculationNode } from './components/CalculationNode';
+
 import './App.css';
 
 const initialNodes = [
@@ -80,23 +82,50 @@ export default function App() {
 
     const treePayload = {
       updatedAt: new Date().toISOString(),
-      rules: nodes.map(node => ({
+      // rules: nodes.map(node => ({
+      //   id: node.id,
+      //   conditionTypeCode: node.type,
+      //   metricTypeCode: RULE_METRIC_MAP[node.type] || 'TEXT',
+      //   variableName: node.data.variableName || 'UNNAMED',
+      //   meta: {
+      //     options: node.data.options || null,
+      //     rangeMax: node.data.rangeMax || null,
+      //   }
+      // })),
+      // conditions: edges.map(edge => ({
+      //   id: edge.id,
+      //   fromRuleId: edge.source,
+      //   toRuleId: edge.target,
+      //   conditionValueTypeCode: edge.data?.conditionValueTypeCode || 'NOT_SET',
+      //   value: edge.data?.value || (edge.data?.conditionValueTypeCode === 'BOOL_TRUE' ? 'true' : edge.data?.conditionValueTypeCode === 'BOOL_FALSE' ? 'false' : null) || null
+      // })),
+
+      rules: allRules.map(node => ({
         id: node.id,
         conditionTypeCode: node.type,
         metricTypeCode: RULE_METRIC_MAP[node.type] || 'TEXT',
-        variableName: node.data.variableName || 'UNNAMED',
+        variableName: node.data.variableName || 'NO_SET',
         meta: {
           options: node.data.options || null,
           rangeMax: node.data.rangeMax || null,
         }
       })),
+
       conditions: edges.map(edge => ({
         id: edge.id,
         fromRuleId: edge.source,
         toRuleId: edge.target,
         conditionValueTypeCode: edge.data?.conditionValueTypeCode || 'NOT_SET',
-        value: edge.data?.value || (edge.data?.conditionValueTypeCode === 'BOOL_TRUE' ? 'true' : edge.data?.conditionValueTypeCode === 'BOOL_FALSE' ? 'false' : null) || null
+        value: edge.data?.value || null
+      })),
+
+      calculations: allCalculations.map(node => ({
+        id: node.id,
+        calculationTypeCode: node.data.calculationTypeCode || 'MATH_FORMULA',
+        returnMetricType: node.data.returnMetricType || 'NUMBER',
+        expression: node.data.expression || ''
       }))
+
     };
 
     console.log("=== GENERATOED STRUCTURE OF CALCULATIONS TREE ===");
