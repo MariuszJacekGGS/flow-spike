@@ -67,7 +67,7 @@ export default function App() {
       type: ruleType,
       position: { x: Math.random() * 200 + 100, y: Math.random() * 200 + 100 },
       data: { 
-        variableName: `NOWA_ZMIENNA_${nodes.length}`,
+        variableName: `NEW_VARIABLE_${nodes.length}`,
         options: ruleType === 'SELECT' ? [] : null
       },
     };
@@ -97,14 +97,14 @@ export default function App() {
 
         const parentNode = nodes.find(node => node.id === incomingEdge.source);
 
-  if (parentNode) {
-          const varName = parentNode.data.variableName || 'NIEZNANA_ZMIENNA';
+      if (parentNode) {
+          const varName = parentNode.data.variableName || 'UNDEFINED_VARIABLE';
           const condType = incomingEdge.data?.conditionValueTypeCode || 'NOT_SET';
           const condVal = incomingEdge.data?.value || '';
 
           let stepDescription = '';
           if (condType === 'BOOL_TRUE') stepDescription = `${varName} == TRUE`;
-          else if (condType === 'BOOL_FALSE') stepDescription = `${varName} == FALSW`;
+          else if (condType === 'BOOL_FALSE') stepDescription = `${varName} == FALSE`;
           else if (condType === 'LIST_OPTION') stepDescription = `${varName} == "${condVal}"`;
           else if (condType === 'LIST_OTHER') stepDescription = `${varName} == OTHER_VALUE`;
           else if (condType === 'RANGE_SPLIT') stepDescription = `${varName} < ${condVal}`;
